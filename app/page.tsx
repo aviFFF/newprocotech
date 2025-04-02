@@ -64,7 +64,7 @@ const fallbackProjects = [
   },
 ]
 
-// Hardcoded companies data
+// Hardcoded companies data - used as fallback
 const companiesData = [
   {
     id: 1,
@@ -145,10 +145,31 @@ async function getProjects() {
   }
 }
 
+async function getCompanies() {
+  try {
+    // Use the full URL with the environment variable
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/companies`, {
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch companies:", res.status, res.statusText);
+      return companiesData;
+    }
+
+    const data = await res.json();
+    return Array.isArray(data) && data.length > 0 ? data : companiesData;
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    return companiesData;
+  }
+}
+
 export default async function Home() {
   // Use fallback data if fetch fails
   let courses = fallbackCourses
   let projects = fallbackProjects
+  let companies = companiesData
 
   try {
     courses = await getCourses()
@@ -161,9 +182,12 @@ export default async function Home() {
   } catch (error) {
     console.error("Error loading projects:", error)
   }
-
-  // Use hardcoded companies data directly
-  const companies = companiesData
+  
+  try {
+    companies = await getCompanies()
+  } catch (error) {
+    console.error("Error loading companies:", error)
+  }
 
   // Display only 3 courses and projects on the homepage
   const featuredCourses = courses.slice(0, 3)
@@ -215,22 +239,16 @@ export default async function Home() {
               Comprehensive programming courses designed to help you master the latest technologies.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredCourses.map((course) => (
               <Card key={course.id} className="overflow-hidden">
-                <Image
-                  src={course.image_url || "/placeholder.svg?height=200&width=400"}
-                  alt="courseimage"
-                  width={400}
-                  height={200}
-                  className="w-full h-48 object-cover"
-                />
+                <div className="bg-primary/10 h-24 flex items-center justify-center">
+                  <h3 className="text-xl font-bold text-center px-4">{course.title}</h3>
+                </div>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                  <p className="text-muted-foreground mb-4">{course.description}</p>
+                  <p className="text-muted-foreground mb-4 line-clamp-3">{course.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="font-medium">{course.duration}</span>
-                    <span className="font-bold">${course.price}</span>
                   </div>
                 </CardContent>
               </Card>

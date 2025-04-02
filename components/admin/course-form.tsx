@@ -16,8 +16,6 @@ const formSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   duration: z.string().min(2, { message: "Duration is required." }),
-  price: z.coerce.number().positive({ message: "Price must be a positive number." }),
-  image_url: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -39,8 +37,6 @@ export default function CourseForm({ initialData, isEditing = false }: CourseFor
       title: "",
       description: "",
       duration: "",
-      price: 0,
-      image_url: "",
     },
   })
 
@@ -64,7 +60,41 @@ export default function CourseForm({ initialData, isEditing = false }: CourseFor
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || "Something went wrong")
+        // Show a more helpful error message to guide the user
+        const errorMessage = result.error || "Something went wrong";
+        
+        if (errorMessage.includes("table") && errorMessage.includes("does not exist")) {
+          // Database setup error - show guidance
+          toast({
+            title: "Database Setup Required",
+            description: (
+              <div className="space-y-2">
+                <p>The database tables have not been set up yet.</p>
+                <a 
+                  href="/admin/setup" 
+                  className="block text-blue-600 underline hover:text-blue-800"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push("/admin/setup");
+                  }}
+                >
+                  Go to Database Setup Page
+                </a>
+              </div>
+            ),
+            variant: "destructive",
+            duration: 10000, // Show for longer
+          });
+        } else {
+          // Standard error
+          toast({
+            title: "Submission Failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Show success message
@@ -80,13 +110,6 @@ export default function CourseForm({ initialData, isEditing = false }: CourseFor
       router.refresh()
     } catch (error) {
       console.error("Error submitting course:", error)
-
-      // Show error message
-      toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      })
     } finally {
       setIsSubmitting(false)
     }
@@ -123,44 +146,14 @@ export default function CourseForm({ initialData, isEditing = false }: CourseFor
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="duration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. 8 weeks" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price ($)</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <FormField
           control={form.control}
-          name="image_url"
+          name="duration"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Duration</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
+                <Input placeholder="e.g. 8 weeks" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

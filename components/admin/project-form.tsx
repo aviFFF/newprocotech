@@ -34,10 +34,16 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
   const { toast } = useToast()
   const router = useRouter()
 
+  // Make sure initialData has a valid technologies array
+  const sanitizedInitialData = initialData ? {
+    ...initialData,
+    technologies: Array.isArray(initialData.technologies) ? initialData.technologies : []
+  } : undefined
+
   // Initialize form with initial data if editing
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
+    defaultValues: sanitizedInitialData || {
       title: "",
       description: "",
       image_url: "",
@@ -67,6 +73,19 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
     setIsSubmitting(true)
 
     try {
+      // Add technologies from component state to form data
+      data.technologies = technologies;
+
+      // Make sure technologies isn't empty
+      if (data.technologies.length === 0) {
+        form.setError('technologies', {
+          type: 'manual',
+          message: 'Please add at least one technology',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       const url = isEditing && initialData?.id 
         ? `${baseUrl}/api/admin/projects/${initialData.id}` 
@@ -85,7 +104,63 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Something went wrong");
+        // Show a more helpful error message based on the error type
+        const errorMessage = result.error || "Something went wrong";
+        
+        if (errorMessage.includes("table") && errorMessage.includes("does not exist")) {
+          // Database setup error - show guidance
+          toast({
+            title: "Database Setup Required",
+            description: (
+              <div className="space-y-2">
+                <p>The database tables have not been set up yet.</p>
+                <a 
+                  href="/admin/setup" 
+                  className="block text-blue-600 underline hover:text-blue-800"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push("/admin/setup");
+                  }}
+                >
+                  Go to Database Setup Page
+                </a>
+              </div>
+            ),
+            variant: "destructive",
+            duration: 10000, // Show for longer
+          });
+        } else if (errorMessage.includes("technologies") && (errorMessage.includes("column") || errorMessage.includes("schema"))) {
+          // Technologies column error - show guidance
+          toast({
+            title: "Database Update Required",
+            description: (
+              <div className="space-y-2">
+                <p>Your database needs to be updated to include the technologies field.</p>
+                <a 
+                  href="/admin/setup" 
+                  className="block text-blue-600 underline hover:text-blue-800"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push("/admin/setup");
+                  }}
+                >
+                  Go to Database Setup Page
+                </a>
+              </div>
+            ),
+            variant: "destructive",
+            duration: 10000, // Show for longer
+          });
+        } else {
+          // Standard error
+          toast({
+            title: "Submission Failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Show success message
@@ -101,13 +176,6 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
       router.refresh();
     } catch (error) {
       console.error("Error submitting project:", error);
-
-      // Show error message
-      toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
     } finally {
       setIsSubmitting(false);
     }

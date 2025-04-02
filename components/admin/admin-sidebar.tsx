@@ -11,7 +11,9 @@ import {
   LogOut,
   Settings,
   Database,
+  Home,
 } from "lucide-react"
+import LogoutButton from "./logout-button"
 
 const navItems = [
   { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
@@ -50,11 +52,17 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="absolute bottom-4 w-52">
-        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 transition-colors">
-          <LogOut className="h-5 w-5" />
+      <div className="absolute bottom-14 w-52 space-y-2">
+        <Link 
+          href="/" 
+          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 transition-colors"
+        >
+          <Home className="h-5 w-5" />
           <span>Back to Website</span>
         </Link>
+        <div className="px-3 py-2">
+          <LogoutButton />
+        </div>
       </div>
     </div>
   )

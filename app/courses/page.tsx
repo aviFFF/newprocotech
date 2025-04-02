@@ -99,19 +99,13 @@ export default async function CoursesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
           <Card key={course.id} className="overflow-hidden">
-            <Image
-              src={course.image_url || "/placeholder.svg?height=200&width=400"}
-              alt={course.title}
-              width={400}
-              height={200}
-              className="w-full h-48 object-cover"
-            />
+            <div className="bg-primary/10 h-24 flex items-center justify-center">
+              <h3 className="text-xl font-bold text-center px-4">{course.title}</h3>
+            </div>
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold mb-2">{course.title}</h3>
               <p className="text-muted-foreground mb-4">{course.description}</p>
               <div className="flex justify-between items-center">
                 <span className="font-medium">{course.duration}</span>
-                <span className="font-bold">${course.price}</span>
               </div>
             </CardContent>
           </Card>

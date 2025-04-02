@@ -9,24 +9,18 @@ const fallbackCourses = [
     title: "Web Development Fundamentals",
     description: "Learn HTML, CSS, and JavaScript to build modern websites.",
     duration: "8 weeks",
-    price: 299,
-    image_url: "/placeholder.svg?height=200&width=400&text=Web+Dev",
   },
   {
     id: 2,
     title: "React.js Masterclass",
     description: "Master React.js and build powerful single-page applications.",
     duration: "10 weeks",
-    price: 399,
-    image_url: "/placeholder.svg?height=200&width=400&text=React",
   },
   {
     id: 3,
     title: "Full-Stack Development",
     description: "Become a full-stack developer with Node.js, Express, and MongoDB.",
     duration: "12 weeks",
-    price: 499,
-    image_url: "/placeholder.svg?height=200&width=400&text=Full+Stack",
   },
 ]
 

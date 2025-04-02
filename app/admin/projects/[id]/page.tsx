@@ -1,25 +1,58 @@
 import Link from "next/link"
+import { createClient } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
 import ProjectForm from "@/components/admin/project-form"
+import type { Database } from "@/lib/database.types"
 
-// In a real application, you would fetch this data from your database
+// Fallback project data
+const fallbackProject = {
+  id: 0,
+  title: "Sample Project",
+  description: "This is a sample project",
+  image_url: "/placeholder.svg", 
+  technologies: ["Sample Technology"],
+  url: null
+}
+
+// Fetch project from the database
 async function getProject(id: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/projects/${id}`, {
-      cache: "no-store",
-    })
-
-    if (!res.ok) {
-      console.error("Failed to fetch project:", res.status, res.statusText)
-      return null
+    // Check if Supabase environment variables are available
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn("Supabase credentials not found. Using fallback data.")
+      return { ...fallbackProject, id: parseInt(id) }
     }
 
-    return res.json()
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+    
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .single()
+    
+    if (error) {
+      console.error("Error fetching project:", error)
+      return { ...fallbackProject, id: parseInt(id) }
+    }
+    
+    if (!data) {
+      return { ...fallbackProject, id: parseInt(id) }
+    }
+    
+    // Ensure the technologies field is an array
+    return {
+      ...data,
+      technologies: Array.isArray(data.technologies) ? data.technologies : []
+    }
   } catch (error) {
     console.error("Error fetching project:", error)
-    return null
+    return { ...fallbackProject, id: parseInt(id) }
   }
 }
 

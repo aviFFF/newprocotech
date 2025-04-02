@@ -1,15 +1,18 @@
 import type React from "react"
 import { redirect } from "next/navigation"
 import AdminSidebar from "@/components/admin/admin-sidebar"
+import { isAdmin } from "@/lib/auth"
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // In a real application, you would check for admin authentication here
-  // This is a simplified version for demonstration purposes
-  const isAuthenticated = true // Replace with actual auth check
+  // DEVELOPMENT ONLY: Bypass authentication check
+  const isAuthenticated = true
+  
+  // Production code (currently disabled)
+  // const isAuthenticated = await isAdmin()
 
   if (!isAuthenticated) {
     redirect("/login")

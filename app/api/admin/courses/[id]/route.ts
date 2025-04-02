@@ -6,10 +6,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const id = params.id
     const body = await request.json()
-    const { title, description, duration, price, image_url } = body
+    const { title, description, duration } = body
 
     // Validate the request
-    if (!title || !description || !duration || !price) {
+    if (!title || !description || !duration) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
@@ -26,21 +26,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         title,
         description,
         duration,
-        price,
-        image_url: image_url || "/placeholder.svg?height=200&width=400",
       })
       .eq("id", id)
       .select()
 
     if (error) {
       console.error("Error updating course:", error)
-      return NextResponse.json({ error: "Failed to update course" }, { status: 500 })
+      return NextResponse.json({ error: error.message || "Failed to update course" }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data: data[0] })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
   }
 }
 
@@ -59,13 +57,13 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     if (error) {
       console.error("Error deleting course:", error)
-      return NextResponse.json({ error: "Failed to delete course" }, { status: 500 })
+      return NextResponse.json({ error: error.message || "Failed to delete course" }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
   }
 }
 

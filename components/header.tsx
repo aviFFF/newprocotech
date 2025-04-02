@@ -51,6 +51,12 @@ export default function Header() {
               {item.name}
             </Link>
           ))}
+          {/* <Link 
+            href="/login"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Admin
+          </Link> */}
           <ModeToggle />
         </nav>
 
@@ -78,6 +84,13 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
+              <Link
+                href="/login"
+                className="text-lg font-medium text-muted-foreground transition-colors hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin
+              </Link>
             </nav>
           </div>
         )}
