@@ -34,7 +34,7 @@ export default function AboutPage() {
       <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
         <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About Us</h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
-          Learn more about our company, our mission, and the team behind DevGenius.
+          Learn more about our company, our mission, and the team behind Proco.
         </p>
       </div>
 
@@ -44,7 +44,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-2xl font-bold mb-4">Our Story</h2>
             <p className="text-muted-foreground mb-4">
-              Founded in 2015, DevGenius started with a simple mission: to bridge the gap between theoretical knowledge
+              Founded in 2019, Proco started with a simple mission: to bridge the gap between theoretical knowledge
               and practical skills in software development.
             </p>
             <p className="text-muted-foreground mb-4">
@@ -83,7 +83,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
             <p className="text-muted-foreground mb-4">
-              At DevGenius, our mission is to empower individuals and organizations through technology and education.
+              At Proco, our mission is to empower individuals and organizations through technology and education.
             </p>
             <p className="text-muted-foreground mb-4">
               We believe that great software should be both powerful and accessible, and that learning to code should be

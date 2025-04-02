@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin Setup | DevGenius",
-  description: "Setup the administrator account for DevGenius",
+  title: "Admin Setup | Proco",
+  description: "Setup the administrator account for Proco",
 }
 
 export default function AdminSetupLayout({

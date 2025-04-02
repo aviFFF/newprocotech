@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin Login | DevGenius",
-  description: "Login to access the DevGenius admin panel",
+  title: "Admin Login | Proco",
+  description: "Login to access the Proco admin panel",
 }
 
 export default function LoginLayout({

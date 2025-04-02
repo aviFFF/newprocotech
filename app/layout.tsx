@@ -11,7 +11,7 @@ import { SupabaseProvider } from "@/components/supabase-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "DevGenius - Software Development & Programming Courses",
+  title: "Proco - Software Development & Programming Courses",
   description: "Professional software development services and comprehensive programming courses for all skill levels.",
     generator: 'v0.dev'
 }
