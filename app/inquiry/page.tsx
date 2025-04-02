@@ -126,7 +126,7 @@ export default function InquiryPage() {
                 <FormItem>
                   <FormLabel>Subject</FormLabel>
                   <FormControl>
-                    <Input placeholder="Inquiry subject" {...field} />
+                    <Input placeholder="Inquiry About" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

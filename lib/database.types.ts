@@ -66,25 +66,25 @@ export interface Database {
           id: number
           name: string
           email: string
-          subject: string
           message: string
           created_at?: string
+          subject?: string
         }
         Insert: {
           id?: number
           name: string
           email: string
-          subject: string
           message: string
           created_at?: string
+          subject?: string
         }
         Update: {
           id?: number
           name?: string
           email?: string
-          subject?: string
           message?: string
           created_at?: string
+          subject?: string
         }
       }
       companies: {

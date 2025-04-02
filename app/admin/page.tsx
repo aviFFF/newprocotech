@@ -1,30 +1,85 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MessageSquare, BookOpen, FolderKanban, Building2 } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+import type { Database } from "@/lib/database.types"
 
-// In a real application, you would fetch this data from your database
+// Function to fetch dashboard stats from various APIs and databases
 async function getDashboardStats() {
-  return {
-    inquiries: 24,
-    courses: 12,
-    projects: 18,
-    companies: 8,
-    recentInquiries: [
-      {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        subject: "Custom Software Development",
-        date: "2023-09-15",
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        email: "jane@example.com",
-        subject: "Course Enrollment Question",
-        date: "2023-09-14",
-      },
-      { id: 3, name: "Bob Johnson", email: "bob@example.com", subject: "Partnership Opportunity", date: "2023-09-13" },
-    ],
+  try {
+    // Initialize Supabase client
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+
+    // Fetch inquiries count and recent inquiries
+    const { data: inquiriesCount, error: inquiriesCountError } = await supabase
+      .from("inquiries")
+      .select("*", { count: "exact", head: true })
+    
+    const { data: recentInquiries, error: recentInquiriesError } = await supabase
+      .from("inquiries")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5)
+
+    if (inquiriesCountError || recentInquiriesError) {
+      console.error("Error fetching inquiries data:", inquiriesCountError || recentInquiriesError)
+    }
+
+    // Fetch courses count
+    const { data: coursesCount, error: coursesCountError } = await supabase
+      .from("courses")
+      .select("*", { count: "exact", head: true })
+    
+    if (coursesCountError) {
+      console.error("Error fetching courses data:", coursesCountError)
+    }
+
+    // Fetch projects count
+    const { data: projectsCount, error: projectsCountError } = await supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+    
+    if (projectsCountError) {
+      console.error("Error fetching projects data:", projectsCountError)
+    }
+
+    // Fetch companies count
+    const { data: companiesCount, error: companiesCountError } = await supabase
+      .from("companies")
+      .select("*", { count: "exact", head: true })
+    
+    if (companiesCountError) {
+      console.error("Error fetching companies data:", companiesCountError)
+    }
+
+    // Format inquiries for display
+    const formattedInquiries = recentInquiries ? recentInquiries.map(inquiry => ({
+      id: inquiry.id,
+      name: inquiry.name,
+      email: inquiry.email,
+      subject: inquiry.subject,
+      date: new Date(inquiry.created_at || '').toISOString().split('T')[0]
+    })) : []
+
+    return {
+      inquiries: inquiriesCount?.length || 0,
+      courses: coursesCount?.length || 0,
+      projects: projectsCount?.length || 0,
+      companies: companiesCount?.length || 0,
+      recentInquiries: formattedInquiries,
+    }
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error)
+    // Return default values in case of error
+    return {
+      inquiries: 0,
+      courses: 0,
+      projects: 0,
+      companies: 0,
+      recentInquiries: [],
+    }
   }
 }
 
@@ -43,7 +98,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.inquiries}</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p>
+            <p className="text-xs text-muted-foreground">Latest inquiries from users</p>
           </CardContent>
         </Card>
 
@@ -54,7 +109,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.courses}</div>
-            <p className="text-xs text-muted-foreground">+2 new this month</p>
+            <p className="text-xs text-muted-foreground">Available courses</p>
           </CardContent>
         </Card>
 
@@ -65,7 +120,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.projects}</div>
-            <p className="text-xs text-muted-foreground">3 completed this month</p>
+            <p className="text-xs text-muted-foreground">Showcase projects</p>
           </CardContent>
         </Card>
 
@@ -76,7 +131,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.companies}</div>
-            <p className="text-xs text-muted-foreground">+1 new partnership</p>
+            <p className="text-xs text-muted-foreground">Business partnerships</p>
           </CardContent>
         </Card>
       </div>
@@ -87,26 +142,30 @@ export default async function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Name</th>
-                  <th className="text-left py-3 px-4 font-medium">Email</th>
-                  <th className="text-left py-3 px-4 font-medium">Subject</th>
-                  <th className="text-left py-3 px-4 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentInquiries.map((inquiry) => (
-                  <tr key={inquiry.id} className="border-b">
-                    <td className="py-3 px-4">{inquiry.name}</td>
-                    <td className="py-3 px-4">{inquiry.email}</td>
-                    <td className="py-3 px-4">{inquiry.subject}</td>
-                    <td className="py-3 px-4">{inquiry.date}</td>
+            {stats.recentInquiries.length === 0 ? (
+              <p className="text-center py-4 text-muted-foreground">No inquiries found</p>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-medium">Name</th>
+                    <th className="text-left py-3 px-4 font-medium">Email</th>
+                    <th className="text-left py-3 px-4 font-medium">Subject</th>
+                    <th className="text-left py-3 px-4 font-medium">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.recentInquiries.map((inquiry) => (
+                    <tr key={inquiry.id} className="border-b">
+                      <td className="py-3 px-4">{inquiry.name}</td>
+                      <td className="py-3 px-4">{inquiry.email}</td>
+                      <td className="py-3 px-4">{inquiry.subject}</td>
+                      <td className="py-3 px-4">{inquiry.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>

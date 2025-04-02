@@ -6,15 +6,18 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/components/ui/use-toast"
 
 // Define form schema with Zod
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  logo_url: z.string().url({ message: "Please enter a valid URL." }),
-  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
+  logo_url: z.string().url({ message: "Please enter a valid logo URL." }),
+  website: z.string()
+    .url({ message: "Please enter a valid website URL." })
+    .optional()
+    .or(z.literal("")),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -44,7 +47,10 @@ export default function CompanyForm({ initialData, isEditing = false }: CompanyF
     setIsSubmitting(true)
 
     try {
-      const url = isEditing && initialData?.id ? `/api/admin/companies/${initialData.id}` : "/api/admin/companies"
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+      const url = isEditing && initialData?.id 
+        ? `${baseUrl}/api/admin/companies/${initialData.id}` 
+        : `${baseUrl}/api/admin/companies`
 
       const method = isEditing ? "PUT" : "POST"
 
@@ -56,10 +62,49 @@ export default function CompanyForm({ initialData, isEditing = false }: CompanyF
         body: JSON.stringify(data),
       })
 
-      const result = await response.json()
+      let result
+      try {
+        const text = await response.text()
+        result = text ? JSON.parse(text) : {}
+      } catch (jsonError) {
+        console.error("Error parsing response:", jsonError)
+        throw new Error("Invalid response from server. Please try again or check console for details.")
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || "Something went wrong")
+        // Show a more helpful error message based on the error type
+        const errorMessage = result?.error || "Something went wrong"
+        
+        if (errorMessage.includes("table") && errorMessage.includes("does not exist")) {
+          toast({
+            title: "Database Setup Required",
+            description: (
+              <div className="space-y-2">
+                <p>The database tables have not been set up yet.</p>
+                <a 
+                  href="/admin/setup" 
+                  className="block text-blue-600 underline hover:text-blue-800"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    router.push("/admin/setup")
+                  }}
+                >
+                  Go to Database Setup Page
+                </a>
+              </div>
+            ),
+            variant: "destructive",
+            duration: 10000,
+          })
+        } else {
+          toast({
+            title: "Submission Failed",
+            description: errorMessage,
+            variant: "destructive",
+          })
+        }
+        
+        throw new Error(errorMessage)
       }
 
       // Show success message
@@ -75,13 +120,6 @@ export default function CompanyForm({ initialData, isEditing = false }: CompanyF
       router.refresh()
     } catch (error) {
       console.error("Error submitting company:", error)
-
-      // Show error message
-      toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      })
     } finally {
       setIsSubmitting(false)
     }

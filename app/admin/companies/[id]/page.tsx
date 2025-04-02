@@ -4,22 +4,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
 import CompanyForm from "@/components/admin/company-form"
 
-// In a real application, you would fetch this data from your database
+// Fallback company data
+const fallbackCompany = {
+  id: 0,
+  name: "Sample Company",
+  logo_url: "/placeholder.svg?height=60&width=120&text=Sample",
+  website: null
+}
+
+// Fetch company from the API
 async function getCompany(id: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/admin/companies/${id}`, {
-      cache: "no-store",
+    // Use the API endpoint
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const response = await fetch(`${baseUrl}/api/admin/companies/${id}`, {
+      cache: 'no-store',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
 
-    if (!res.ok) {
-      console.error("Failed to fetch company:", res.status, res.statusText)
-      return null
+    if (!response.ok) {
+      console.error("Error fetching company: HTTP", response.status)
+      return { ...fallbackCompany, id: parseInt(id) }
     }
 
-    return res.json()
+    const result = await response.json()
+    
+    if (!result.data) {
+      console.error("No data returned from API")
+      return { ...fallbackCompany, id: parseInt(id) }
+    }
+    
+    return result.data
   } catch (error) {
     console.error("Error fetching company:", error)
-    return null
+    return { ...fallbackCompany, id: parseInt(id) }
   }
 }
 

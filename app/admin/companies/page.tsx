@@ -2,7 +2,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Pencil, Trash2, AlertTriangle } from "lucide-react"
+import { Plus, PlusCircle, AlertTriangle } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+import type { Database } from "@/lib/database.types"
+import CompanyActions from "./company-actions"
 
 // Mark the page as dynamically rendered
 export const dynamic = "force-dynamic"
@@ -32,56 +35,45 @@ const fallbackCompanies = [
 // In a real application, you would fetch this data from your database
 async function getCompanies() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/admin/companies`, {
-      cache: "no-store",
-    })
-
-    if (!res.ok) {
-      console.error("Failed to fetch companies:", res.status, res.statusText)
-      return { companies: fallbackCompanies, error: true }
+    // Initialize Supabase client
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    
+    const { data: companies, error } = await supabase
+      .from("companies")
+      .select("*")
+      .order("created_at", { ascending: false })
+    
+    if (error) {
+      console.error("Error fetching companies:", error)
+      return []
     }
-
-    const data = await res.json()
-    return {
-      companies: Array.isArray(data) && data.length > 0 ? data : fallbackCompanies,
-      error: false,
-    }
+    
+    return companies
   } catch (error) {
-    console.error("Error fetching companies:", error)
-    return {
-      companies: fallbackCompanies,
-      error: true,
-    }
+    console.error("Error in getCompanies:", error)
+    return []
   }
 }
 
 export default async function CompaniesAdminPage() {
-  // Use fallback data if fetch fails
-  let companies = fallbackCompanies
-  let error = false
-
-  try {
-    const result = await getCompanies()
-    companies = result.companies
-    error = result.error
-  } catch (e) {
-    console.error("Error loading companies:", e)
-    error = true
-  }
-
+  const companies = await getCompanies()
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Partner Companies</h1>
-        <Link href="/admin/companies/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Company
-          </Button>
-        </Link>
+        <Button asChild>
+          <Link href="/admin/companies/add">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Company
+          </Link>
+        </Button>
       </div>
 
-      {error && (
+      {companies.length === 0 ? (
         <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800">
           <CardContent className="p-4 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
@@ -99,45 +91,53 @@ export default async function CompaniesAdminPage() {
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>All Companies</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-medium">Name</th>
+                    <th className="text-left py-3 px-4 font-medium">Logo</th>
+                    <th className="text-left py-3 px-4 font-medium">Website</th>
+                    <th className="text-right py-3 px-4 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {companies.map((company) => (
+                    <tr key={company.id} className="border-b">
+                      <td className="py-3 px-4">{company.name}</td>
+                      <td className="py-3 px-4">
+                        <img 
+                          src={company.logo_url} 
+                          alt={`${company.name} logo`}
+                          className="h-10 w-auto object-contain"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        {company.website ? (
+                          <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                            {company.website}
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <CompanyActions company={company} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>All Companies</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {companies.map((company) => (
-              <Card key={company.id} className="overflow-hidden">
-                <div className="p-4 flex justify-center">
-                  <Image
-                    src={company.logo_url || "/placeholder.svg?height=60&width=120"}
-                    alt={company.name}
-                    width={120}
-                    height={60}
-                    className="object-contain"
-                  />
-                </div>
-                <CardContent className="p-4 border-t">
-                  <h3 className="font-bold text-center mb-2">{company.name}</h3>
-                  <div className="flex justify-center space-x-2">
-                    <Link href={`/admin/companies/${company.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

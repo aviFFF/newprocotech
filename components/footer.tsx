@@ -14,7 +14,7 @@ export default function Footer() {
               width={50}
               height={50}
               src="/logo.webp"
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 rounded-full"
             />
             <p className="text-sm text-muted-foreground">
               Empowering the next generation of developers with cutting-edge

@@ -1,10 +1,11 @@
 import Link from "next/link"
-import { createClient } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertTriangle } from "lucide-react"
 import ProjectForm from "@/components/admin/project-form"
+import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/lib/database.types"
+import { notFound } from "next/navigation"
 
 // Fallback project data
 const fallbackProject = {
@@ -16,67 +17,105 @@ const fallbackProject = {
   url: null
 }
 
-// Fetch project from the database
+// Validate project ID is numeric
+function isValidProjectId(id: string): boolean {
+  return /^\d+$/.test(id);
+}
+
+// Fetch project from the API
 async function getProject(id: string) {
   try {
-    // Check if Supabase environment variables are available
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.warn("Supabase credentials not found. Using fallback data.")
-      return { ...fallbackProject, id: parseInt(id) }
+    // Validate ID is numeric first
+    if (!isValidProjectId(id)) {
+      console.error(`Invalid project ID: ${id} - must be numeric`);
+      return null;
+    }
+    
+    console.log(`Fetching project with ID ${id}`);
+    
+    // Try direct database query first with service role key (more reliable)
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log("Using direct Supabase query with service role key");
+      
+      const supabase = createClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", id)
+        .single();
+        
+      if (error) {
+        console.error("Supabase error fetching project:", error);
+      } else if (data) {
+        console.log("Project found via direct Supabase query");
+        return {
+          ...data,
+          technologies: Array.isArray(data.technologies) ? data.technologies : []
+        };
+      }
+    }
+    
+    // Fallback to API endpoint
+    console.log("Falling back to API endpoint");
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const response = await fetch(`${baseUrl}/api/admin/projects/${id}`, {
+      cache: 'no-store',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      console.error("Error fetching project: HTTP", response.status);
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      return null;
     }
 
-    const supabase = createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
+    const result = await response.json()
     
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("id", id)
-      .single()
-    
-    if (error) {
-      console.error("Error fetching project:", error)
-      return { ...fallbackProject, id: parseInt(id) }
+    if (!result.data) {
+      console.error("No data returned from API");
+      return null;
     }
     
-    if (!data) {
-      return { ...fallbackProject, id: parseInt(id) }
-    }
+    console.log("Project found via API:", result.data);
     
     // Ensure the technologies field is an array
     return {
-      ...data,
-      technologies: Array.isArray(data.technologies) ? data.technologies : []
+      ...result.data,
+      technologies: Array.isArray(result.data.technologies) ? result.data.technologies : []
     }
   } catch (error) {
     console.error("Error fetching project:", error)
-    return { ...fallbackProject, id: parseInt(id) }
+    return null;
   }
 }
 
-export default async function EditProjectPage({ params }: { params: { id: string } }) {
-  const project = await getProject(params.id)
+interface EditProjectPageProps {
+  params: {
+    id: string;
+  }
+}
+
+export default async function EditProjectPage({ params }: EditProjectPageProps) {
+  // Extract and validate ID
+  const { id } = params;
+  
+  if (!isValidProjectId(id)) {
+    notFound();
+  }
+  
+  console.log("Rendering edit page for project ID:", id);
+  const project = await getProject(id);
 
   if (!project) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/admin/projects">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Projects
-            </Button>
-          </Link>
-        </div>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center">Project not found.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    notFound();
   }
 
   return (

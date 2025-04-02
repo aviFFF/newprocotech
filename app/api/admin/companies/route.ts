@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import type { Database } from "@/lib/database.types"
 
 // Sample fallback data in case the database isn't set up yet
@@ -42,93 +42,74 @@ const fallbackCompanies = [
   },
 ]
 
-export async function GET() {
+// GET all companies with optional pagination
+export async function GET(request: NextRequest) {
   try {
-    // Check if Supabase environment variables are available
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.warn("Supabase environment variables not found, returning fallback data")
-      return NextResponse.json(fallbackCompanies)
+    const searchParams = request.nextUrl.searchParams
+    const limit = parseInt(searchParams.get("limit") || "10")
+    const page = parseInt(searchParams.get("page") || "1")
+    const offset = (page - 1) * limit
+    
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    
+    // Get companies with pagination
+    const { data: companies, error, count } = await supabase
+      .from("companies")
+      .select("*", { count: "exact" })
+      .range(offset, offset + limit - 1)
+    
+    if (error) {
+      console.error("Error fetching companies:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
-    const supabase = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-
-    // Try to fetch data from the companies table
-    try {
-      const { data, error } = await supabase.from("companies").select("*")
-
-      // If there's an error or no data, return fallback data
-      if (error || !data || data.length === 0) {
-        console.warn("Error or no data from Supabase, returning fallback data:", error?.message)
-        return NextResponse.json(fallbackCompanies)
-      }
-
-      return NextResponse.json(data)
-    } catch (dbError) {
-      console.error("Database error:", dbError)
-      return NextResponse.json(fallbackCompanies)
-    }
+    
+    return NextResponse.json({ 
+      data: companies,
+      total: count,
+      page,
+      limit
+    })
   } catch (error) {
-    console.error("Unexpected error in companies API:", error)
-    // Return fallback data on any error
-    return NextResponse.json(fallbackCompanies)
+    console.error("Unexpected error fetching companies:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
-export async function POST(request: Request) {
+// POST a new company
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { name, logo_url, website } = body
-
-    // Validate the request
+    
+    // Validate required fields
     if (!name || !logo_url) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json({ error: "Name and logo URL are required" }, { status: 400 })
     }
-
-    // Check if Supabase environment variables are available
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: "Database configuration not found" }, { status: 500 })
+    
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    
+    const { data, error } = await supabase
+      .from("companies")
+      .insert([{ name, logo_url, website }])
+      .select()
+    
+    if (error) {
+      console.error("Error creating company:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
-    const supabase = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-
-    try {
-      // Try to insert data into the companies table
-      const { data, error } = await supabase
-        .from("companies")
-        .insert([
-          {
-            name,
-            logo_url,
-            website: website || null,
-          },
-        ])
-        .select()
-
-      // If there's an error
-      if (error) {
-        console.error("Error creating company:", error)
-
-        // If the table doesn't exist, return a more specific error
-        if (error.message.includes('relation "companies" does not exist')) {
-          return NextResponse.json(
-            {
-              error: "Companies table does not exist in the database. Please create the table first.",
-              details: "Visit /admin/setup for instructions on creating the necessary database tables.",
-            },
-            { status: 500 },
-          )
-        }
-
-        return NextResponse.json({ error: "Failed to create company" }, { status: 500 })
-      }
-
-      return NextResponse.json({ success: true, data: data[0] })
-    } catch (dbError) {
-      console.error("Database error:", dbError)
-      return NextResponse.json({ error: "Database error occurred" }, { status: 500 })
-    }
+    
+    return NextResponse.json({ 
+      success: true,
+      data: data[0]
+    }, { status: 201 })
   } catch (error) {
-    console.error("Unexpected error:", error)
+    console.error("Unexpected error creating company:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
