@@ -1,13 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Pencil, Trash } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { useRouter } from "next/navigation"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { toast } from "@/components/ui/use-toast"
 
 interface CompanyActionsProps {
   company: {
@@ -20,15 +35,13 @@ interface CompanyActionsProps {
 
 export default function CompanyActions({ company }: CompanyActionsProps) {
   const router = useRouter()
-  const { toast } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  async function deleteCompany() {
-    setIsDeleting(true)
+  const handleDelete = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-      const response = await fetch(`${baseUrl}/api/admin/companies/${company.id}`, {
+      setIsDeleting(true)
+      const response = await fetch(`/api/admin/companies/${company.id}`, {
         method: "DELETE",
       })
 
@@ -37,16 +50,16 @@ export default function CompanyActions({ company }: CompanyActionsProps) {
       }
 
       toast({
-        title: "Company Deleted",
-        description: `${company.name} has been deleted successfully.`,
+        title: "Company deleted",
+        description: "The company has been successfully deleted.",
       })
-
+      
       router.refresh()
     } catch (error) {
       console.error("Error deleting company:", error)
       toast({
         title: "Error",
-        description: "Failed to delete company. Please try again.",
+        description: "Failed to delete the company. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -59,21 +72,21 @@ export default function CompanyActions({ company }: CompanyActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/admin/companies/${company.id}`} className="flex items-center cursor-pointer">
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Link>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => router.push(`/admin/companies/${company.id}`)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
           </DropdownMenuItem>
           <DropdownMenuItem 
-            className="flex items-center text-destructive focus:text-destructive cursor-pointer"
             onClick={() => setShowDeleteDialog(true)}
+            className="text-red-600 focus:text-red-600"
           >
             <Trash className="mr-2 h-4 w-4" />
             Delete
@@ -84,17 +97,18 @@ export default function CompanyActions({ company }: CompanyActionsProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {company.name}. This action cannot be undone.
+              This will permanently delete the company <span className="font-bold">{company.name}</span>.
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={deleteCompany}
+            <AlertDialogAction 
+              onClick={handleDelete} 
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

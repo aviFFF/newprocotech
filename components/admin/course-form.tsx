@@ -72,7 +72,7 @@ export default function CourseForm({ initialData, isEditing = false }: CourseFor
                 <p>The database tables have not been set up yet.</p>
                 <a 
                   href="/admin/setup" 
-                  className="block text-blue-600 underline hover:text-blue-800"
+                  className="block text-violet-600 underline hover:text-violet-800"
                   onClick={(e) => {
                     e.preventDefault();
                     router.push("/admin/setup");

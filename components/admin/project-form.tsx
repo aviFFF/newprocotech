@@ -71,7 +71,6 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
   // Form submission handler
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true)
-    console.log("Form submission initiated", { isEditing, id: initialData?.id, data });
 
     try {
       // Add technologies from component state to form data
@@ -88,15 +87,13 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-      const endpoint = isEditing && initialData?.id 
+      const url = isEditing && initialData?.id 
         ? `${baseUrl}/api/admin/projects/${initialData.id}` 
         : `${baseUrl}/api/admin/projects`;
-      
-      console.log("Making request to:", endpoint);
 
       const method = isEditing ? "PUT" : "POST";
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -104,20 +101,11 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
         body: JSON.stringify(data),
       });
 
-      let result;
-      try {
-        const text = await response.text();
-        console.log("Response text:", text);
-        result = text ? JSON.parse(text) : {};
-      } catch (jsonError) {
-        console.error("Error parsing response:", jsonError);
-        throw new Error("Invalid response from server. Please try again or check console for details.");
-      }
+      const result = await response.json();
 
       if (!response.ok) {
         // Show a more helpful error message based on the error type
-        const errorMessage = result?.error || "Something went wrong";
-        console.error("Request failed:", { status: response.status, message: errorMessage });
+        const errorMessage = result.error || "Something went wrong";
         
         if (errorMessage.includes("table") && errorMessage.includes("does not exist")) {
           // Database setup error - show guidance
@@ -128,7 +116,7 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
                 <p>The database tables have not been set up yet.</p>
                 <a 
                   href="/admin/setup" 
-                  className="block text-blue-600 underline hover:text-blue-800"
+                  className="block text-violet-600 underline hover:text-violet-800"
                   onClick={(e) => {
                     e.preventDefault();
                     router.push("/admin/setup");
@@ -150,7 +138,7 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
                 <p>Your database needs to be updated to include the technologies field.</p>
                 <a 
                   href="/admin/setup" 
-                  className="block text-blue-600 underline hover:text-blue-800"
+                  className="block text-violet-600 underline hover:text-violet-800"
                   onClick={(e) => {
                     e.preventDefault();
                     router.push("/admin/setup");
@@ -174,8 +162,6 @@ export default function ProjectForm({ initialData, isEditing = false }: ProjectF
         
         throw new Error(errorMessage);
       }
-
-      console.log("Request succeeded:", result);
 
       // Show success message
       toast({

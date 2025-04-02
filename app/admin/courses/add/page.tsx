@@ -46,59 +46,24 @@ export default function AddCoursePage() {
     setIsSubmitting(true)
     
     try {
+      // If image_url is empty, remove it from the data object
+      const submitData = { ...data }
+      if (!submitData.image_url) {
+        delete submitData.image_url;
+      }
+      
       const response = await fetch("/api/admin/courses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submitData),
       })
       
-      let result;
-      try {
-        const text = await response.text();
-        result = text ? JSON.parse(text) : {};
-      } catch (jsonError) {
-        console.error("Error parsing response:", jsonError);
-        throw new Error("Invalid server response. Please check console for details.");
-      }
+      const result = await response.json()
       
       if (!response.ok) {
-        let errorMessage = result?.error || "Failed to create course";
-        
-        // Handle specific error types
-        if (errorMessage.includes("image_url") && errorMessage.includes("column")) {
-          errorMessage = "The database schema is missing the image_url column. Please run setup from the admin/setup page.";
-          
-          toast({
-            title: "Database Schema Issue",
-            description: (
-              <div className="space-y-2">
-                <p>{errorMessage}</p>
-                <a 
-                  href="/admin/setup" 
-                  className="block text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    router.push("/admin/setup");
-                  }}
-                >
-                  Go to Database Setup Page
-                </a>
-              </div>
-            ),
-            variant: "destructive",
-            duration: 10000, // Show for longer
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: errorMessage,
-            variant: "destructive",
-          });
-        }
-        
-        throw new Error(errorMessage);
+        throw new Error(result.error || "Failed to create course")
       }
       
       toast({
@@ -111,13 +76,11 @@ export default function AddCoursePage() {
       router.refresh()
     } catch (error) {
       console.error("Error creating course:", error)
-      if (!(error instanceof Error && error.message.includes("Database Schema Issue"))) {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to create course",
-          variant: "destructive",
-        })
-      }
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create course",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }

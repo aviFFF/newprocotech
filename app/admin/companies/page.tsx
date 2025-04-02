@@ -120,7 +120,7 @@ export default async function CompaniesAdminPage() {
                       </td>
                       <td className="py-3 px-4">
                         {company.website ? (
-                          <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:underline">
                             {company.website}
                           </a>
                         ) : (

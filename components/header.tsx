@@ -33,13 +33,13 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-violet-600 bg-clip-text text-transparent">
             <Image
             alt=""
             width={40}
             height={40}
-            src="/logo.webp"
-            className="lg:h-14 lg:w-14  rounded-full"
+            src="/logo.png"
+            className="h-40 w-40"
             />
             </span>
           </Link>
@@ -58,12 +58,6 @@ export default function Header() {
               {item.name}
             </Link>
           ))}
-          {/* <Link 
-            href="/login"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Admin
-          </Link> */}
           <ModeToggle />
         </nav>
 
@@ -77,8 +71,8 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isOpen && isMobile && (
-          <div className="fixed inset-0 top-16 z-50 bg-background animate-in slide-in-from-top-5">
-            <nav className="container grid gap-6 p-6">
+          <div className="fixed inset-0 top-16 z-50 animate-in slide-in-from-top-5">
+            <nav className="container bg-gray-200 grid gap-6 p-6">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
@@ -91,13 +85,6 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                className="text-lg font-medium text-muted-foreground transition-colors hover:text-primary"
-                onClick={() => setIsOpen(false)}
-              >
-                Admin
-              </Link>
             </nav>
           </div>
         )}

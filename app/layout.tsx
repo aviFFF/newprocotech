@@ -7,13 +7,14 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import { SupabaseProvider } from "@/components/supabase-provider"
+import ChatWrapper from "@/components/chat-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Proco - Software Development & Programming Courses",
   description: "Professional software development services and comprehensive programming courses for all skill levels.",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -30,6 +31,7 @@ export default function RootLayout({
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />
+              <ChatWrapper />
             </div>
             <Toaster />
           </SupabaseProvider>
@@ -38,7 +40,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

@@ -54,57 +54,22 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     )
     
-    // First check if the table exists
-    try {
-      const { data: tableExists, error: tableCheckError } = await supabase
-        .from("courses")
-        .select("count(*)", { count: "exact", head: true })
-      
-      if (tableCheckError) {
-        if (tableCheckError.code === "42P01") { // Table doesn't exist
-          return NextResponse.json({ 
-            error: "Database table 'courses' does not exist. Please run setup from the admin/setup page."
-          }, { status: 500 })
-        }
-      }
-    } catch (tableError) {
-      console.error("Error checking courses table:", tableError)
+    // Create course data object without image_url to avoid schema mismatch
+    const courseData = { 
+      title, 
+      description, 
+      duration, 
+      price 
     }
     
+    // Only include image_url if it's not empty and the field exists in DB
     try {
-      // Try insertion with all fields
       const { data, error } = await supabase
         .from("courses")
-        .insert([{ 
-          title, 
-          description, 
-          duration, 
-          price, 
-          image_url: image_url || null 
-        }])
+        .insert([courseData])
         .select()
       
       if (error) {
-        // If schema error about image_url column, try without it
-        if (error.code === "PGRST204" && error.message.includes("image_url")) {
-          console.log("Retrying without image_url field...")
-          
-          const { data: dataWithoutImage, error: errorWithoutImage } = await supabase
-            .from("courses")
-            .insert([{ title, description, duration, price }])
-            .select()
-          
-          if (errorWithoutImage) {
-            console.error("Error creating course (retry):", errorWithoutImage)
-            return NextResponse.json({ error: errorWithoutImage.message }, { status: 500 })
-          }
-          
-          return NextResponse.json({ 
-            success: true,
-            data: dataWithoutImage?.[0] || null
-          }, { status: 201 })
-        }
-        
         console.error("Error creating course:", error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
@@ -113,11 +78,30 @@ export async function POST(request: NextRequest) {
         success: true,
         data: data[0]
       }, { status: 201 })
-    } catch (insertError) {
-      console.error("Error on insert operation:", insertError)
-      return NextResponse.json({ 
-        error: "Database error during insert operation"
-      }, { status: 500 })
+    } catch (error: any) {
+      console.error("Initial insert failed:", error)
+      
+      // If the first attempt failed, try without image_url
+      if (error.message && error.message.includes("image_url")) {
+        console.log("Retrying without image_url field")
+        const { data, error: secondError } = await supabase
+          .from("courses")
+          .insert([{ title, description, duration, price }])
+          .select()
+        
+        if (secondError) {
+          console.error("Error in second attempt:", secondError)
+          return NextResponse.json({ error: secondError.message }, { status: 500 })
+        }
+        
+        return NextResponse.json({ 
+          success: true,
+          data: data[0]
+        }, { status: 201 })
+      }
+      
+      // If it's a different error, return it
+      return NextResponse.json({ error: error.message || "Database error" }, { status: 500 })
     }
   } catch (error) {
     console.error("Unexpected error creating course:", error)

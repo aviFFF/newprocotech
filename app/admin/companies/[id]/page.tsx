@@ -3,51 +3,49 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
 import CompanyForm from "@/components/admin/company-form"
+import { notFound } from "next/navigation"
 
-// Fallback company data
-const fallbackCompany = {
-  id: 0,
-  name: "Sample Company",
-  logo_url: "/placeholder.svg?height=60&width=120&text=Sample",
-  website: null
-}
-
-// Fetch company from the API
+// In a real application, you would fetch this data from your database
 async function getCompany(id: string) {
   try {
-    // Use the API endpoint
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const response = await fetch(`${baseUrl}/api/admin/companies/${id}`, {
-      cache: 'no-store',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    // Check if this is the "add" route
+    if (id === "add") {
+      // Return null for add route - we'll handle this case separately
+      return null
+    }
+
+    // Try to convert ID to number - handle error gracefully if not a valid number
+    let companyId: number;
+    try {
+      companyId = parseInt(id);
+      if (isNaN(companyId)) {
+        console.error("Invalid company ID format:", id);
+        return null;
+      }
+    } catch (e) {
+      console.error("Error parsing company ID:", e);
+      return null;
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/admin/companies/${companyId}`, {
+      cache: "no-store",
     })
 
-    if (!response.ok) {
-      console.error("Error fetching company: HTTP", response.status)
-      return { ...fallbackCompany, id: parseInt(id) }
+    if (!res.ok) {
+      console.error("Failed to fetch company:", res.status, res.statusText)
+      return null
     }
 
-    const result = await response.json()
-    
-    if (!result.data) {
-      console.error("No data returned from API")
-      return { ...fallbackCompany, id: parseInt(id) }
-    }
-    
-    return result.data
+    return res.json()
   } catch (error) {
     console.error("Error fetching company:", error)
-    return { ...fallbackCompany, id: parseInt(id) }
+    return null
   }
 }
 
 export default async function EditCompanyPage({ params }: { params: { id: string } }) {
-  const company = await getCompany(params.id)
-
-  if (!company) {
+  // Special handling for "add" route
+  if (params.id === "add") {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
@@ -57,14 +55,25 @@ export default async function EditCompanyPage({ params }: { params: { id: string
               Back to Companies
             </Button>
           </Link>
+          <h1 className="text-3xl font-bold">Add New Company</h1>
         </div>
+
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-center">Company not found.</p>
+          <CardHeader>
+            <CardTitle>Company Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CompanyForm isEditing={false} />
           </CardContent>
         </Card>
       </div>
     )
+  }
+
+  const company = await getCompany(params.id)
+
+  if (!company) {
+    return notFound()
   }
 
   return (

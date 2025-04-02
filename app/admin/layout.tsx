@@ -1,40 +1,62 @@
-import type React from "react"
-import { redirect } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
-import AdminSidebar from "@/components/admin/admin-sidebar"
+"use client"
 
-export default async function AdminLayout({
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import AdminSidebar from "@/components/admin/admin-sidebar"
+import { getSupabaseBrowser } from "@/lib/supabase-browser"
+import { Loader2 } from "lucide-react"
+
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Server-side authentication check
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  
-  if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing Supabase environment variables");
-    redirect("/login?error=config");
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const supabase = getSupabaseBrowser()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data } = await supabase.auth.getSession()
+        
+        if (!data.session) {
+          router.push('/login?error=unauthorized')
+          return
+        }
+        
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error("Auth check error:", error)
+        router.push('/login?error=unauthorized')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    checkAuth()
+  }, [router, supabase.auth])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <span className="ml-2 text-xl font-medium">Loading...</span>
+      </div>
+    )
   }
-  
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  
-  // For server component authentication, we can't access cookies directly
-  // We'll stick with a simple check for debugging/development
-  
-  if (process.env.NODE_ENV === "development") {
-    // In development, we'll bypass the authentication check
-    console.log("Development mode: Bypassing authentication check");
-  } else {
-    // In production, we would implement proper server auth
-    // This would need to use the authorization header or another method
-    console.log("Production mode: Using authentication check");
+
+  if (!isAuthenticated) {
+    return null // Will redirect in the useEffect
   }
-  
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <div className="flex-1 p-8">{children}</div>
+      <main className="flex-1 p-8">
+        {children}
+      </main>
     </div>
   )
 }

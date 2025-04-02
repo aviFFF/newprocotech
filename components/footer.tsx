@@ -5,21 +5,17 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <footer className="w-full border-t bg-background">
-      <div className="container py-8">
-        <div className="flex flex-col items-center space-y-8">
+      <div className="container">
+        <div className="flex flex-col items-center space-y-4">
           {/* Logo and Description */}
-          <div className="text-center max-w-2xl">
+          <div className="text-center">
             <Image
               alt="Logo"
               width={50}
               height={50}
-              src="/logo.webp"
-              className="mx-auto mb-4 rounded-full"
+              src="/logo.png"
+              className="mx-auto w-40 h-40"
             />
-            <p className="text-sm text-muted-foreground">
-              Empowering the next generation of developers with cutting-edge
-              software solutions and comprehensive programming education.
-            </p>
           </div>
 
           {/* Navigation Links */}

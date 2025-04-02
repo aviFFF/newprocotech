@@ -98,7 +98,7 @@ export default async function ProjectsPage() {
                       </td>
                       <td className="py-3 px-4">
                         {project.url ? (
-                          <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:underline">
                             {project.url}
                           </a>
                         ) : (
