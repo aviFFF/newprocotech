@@ -281,7 +281,7 @@ export default async function Home() {
                   alt="projectimage"
                   width={400}
                   height={200}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48"
                 />
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-2">{project.title}</h3>
