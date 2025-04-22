@@ -23,22 +23,25 @@ export default function Header() {
   const pathname = usePathname()
   const isMobile = useMobile()
 
+  // Close mobile menu when path changes
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center dark:bg-gray-100 justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center space-x-2">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-violet-600 bg-clip-text text-transparent">
             <Image
-              alt="Logo"
-              width={40}
-              height={40}
-              src="/logo.png"
-              className="h-10 w-10 object-contain"
+            alt=""
+            width={40}
+            height={40}
+            src="/logo.png"
+            className="h-40 w-40"
             />
+            </span>
           </Link>
         </div>
 
@@ -49,9 +52,7 @@ export default function Header() {
               key={item.path}
               href={item.path}
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === item.path
-                  ? "text-primary"
-                  : "text-muted-foreground dark:text-gray-300"
+                pathname === item.path ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {item.name}
@@ -70,16 +71,14 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isOpen && isMobile && (
-          <div className="fixed inset-0 top-16 z-50 bg-white dark:bg-gray-900 animate-in slide-in-from-top-5 shadow-lg">
-            <nav className="container grid gap-6 p-6">
+          <div className="fixed inset-0 top-16 z-50 animate-in slide-in-from-top-5">
+            <nav className="container bg-gray-200 grid gap-6 p-6">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
                   className={`text-lg font-medium transition-colors hover:text-primary ${
-                    pathname === item.path
-                      ? "text-primary"
-                      : "text-muted-foreground dark:text-gray-300"
+                    pathname === item.path ? "text-primary" : "text-muted-foreground"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
