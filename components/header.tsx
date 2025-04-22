@@ -39,9 +39,6 @@ export default function Header() {
               src="/logo.png"
               className="h-10 w-10 object-contain"
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-violet-600 bg-clip-text text-transparent">
-              MyBrand
-            </span>
           </Link>
         </div>
 
