@@ -73,7 +73,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="order-last md:order-first">
             <Image
-              src="/ourmission.jpg"
+              src="/ourmission.jpg" 
               alt="Our Mission"
               width={600}
               height={400}
