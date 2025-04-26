@@ -58,7 +58,7 @@ export default function AboutPage() {
           </div>
           <div className="order-first md:order-last">
             <Image
-              src="/placeholder.svg?height=400&width=600&text=Our Story"
+              src="/ourstory.jpg"
               alt="Our Story"
               width={600}
               height={400}
@@ -73,7 +73,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="order-last md:order-first">
             <Image
-              src="/placeholder.svg?height=400&width=600&text=Our Mission"
+              src="/ourmission.jpg"
               alt="Our Mission"
               width={600}
               height={400}
@@ -98,7 +98,7 @@ export default function AboutPage() {
       </section>
 
       {/* Our Team Section */}
-      <section>
+      {/* <section>
         <h2 className="text-2xl font-bold mb-6 text-center">Our Team</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {teamMembers.map((member, index) => (
@@ -120,7 +120,7 @@ export default function AboutPage() {
             </Card>
           ))}
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }

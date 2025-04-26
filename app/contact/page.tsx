@@ -21,11 +21,14 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Address</h3>
                     <p className="text-muted-foreground">
-                      123 Tech Street
+                   Ground Floor D N Singh Complex
                       <br />
-                      Silicon Valley, CA 94043
+                      Semra Gauri, Aziz Nagar, 
                       <br />
-                      United States
+                      Madiyanva,Lucknow 
+                      <br />
+                      Uttar Pradesh 226020                      <br />
+                      India
                     </p>
                   </div>
                 </div>
@@ -35,9 +38,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Email</h3>
                     <p className="text-muted-foreground">
-                      contact@Proco.com
-                      <br />
-                      support@Proco.com
+                      avi.sr00@gmail.com
                     </p>
                   </div>
                 </div>
@@ -47,9 +48,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Phone</h3>
                     <p className="text-muted-foreground">
-                      +1 (555) 123-4567
-                      <br />
-                      +1 (555) 987-6543
+                      +91 8383811977 
                     </p>
                   </div>
                 </div>
@@ -74,7 +73,7 @@ export default function ContactPage() {
 
         <div className="h-[400px] md:h-full">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d101268.39579026842!2d-122.12108475!3d37.4219999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fb7495bec0189%3A0x7c17d44a466baf9b!2sMountain%20View%2C%20CA%2C%20USA!5e0!3m2!1sen!2sus!4v1648218071728!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3557.3223038250117!2d80.92241527549284!3d26.924994976639855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3999565edfcb41f1%3A0x135bdd0d8b44ed44!2sD%20N%20SINGH%20COMPLEX!5e0!3m2!1sen!2sin!4v1745611371761!5m2!1sen!2sin%22"
             width="100%"
             height="100%"
             style={{ border: 0, borderRadius: "0.5rem" }}

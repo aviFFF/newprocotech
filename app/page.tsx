@@ -220,7 +220,7 @@ export default async function Home() {
                   </Button>
                 </Link>
                 <Link href="/courses">
-                  <Button size="lg"  variant="outline">
+                  <Button className="bg-black text-white" size="lg"  variant="outline">
                     Explore Courses
                   </Button>
                 </Link>
