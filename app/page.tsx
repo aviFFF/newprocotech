@@ -182,7 +182,7 @@ export default async function Home() {
   } catch (error) {
     console.error("Error loading projects:", error)
   }
-  
+
   try {
     companies = await getCompanies()
   } catch (error) {
@@ -220,7 +220,7 @@ export default async function Home() {
                   </Button>
                 </Link>
                 <Link href="/courses">
-                  <Button className="bg-black text-white" size="lg"  variant="outline">
+                  <Button className="bg-black text-white" size="lg" variant="outline">
                     Explore Courses
                   </Button>
                 </Link>
@@ -239,21 +239,37 @@ export default async function Home() {
               Comprehensive programming courses designed to help you master the latest technologies.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((course) => (
               <Card key={course.id} className="overflow-hidden">
-                <div className="bg-primary/10 h-24 flex items-center justify-center">
-                  <h3 className="text-xl font-bold text-center px-4">{course.title}</h3>
-                </div>
+                <Image
+                  src={course.image_url || "https://yoshirodigital.com/wp-content/uploads/2020/08/Website-Design-Blueprint-and-the-Development-Process.jpg"}
+                  alt="courseimage"
+                  width={400}
+                  height={200}
+                  className="w-full h-64"
+                />
                 <CardContent className="p-6">
-                  <p className="text-muted-foreground mb-4 line-clamp-3">{course.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{course.duration}</span>
+                  <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                  <p className="text-muted-foreground mb-4">{course.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                      Duration: {course.duration}
+                    </span>
+                    <span className="px-2 py-1 bg-primary/10 text-gray-300 rounded-full text-xs">
+                      Enroll Now and get Discount
+                    </span>
                   </div>
+                  <Link href={`/courses`}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      View Course
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
           </div>
+
           <div className="flex justify-center mt-10">
             <Link href="/courses">
               <Button variant="outline" size="lg" className="gap-1">
@@ -343,10 +359,18 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Chat Assistant */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <ChatAssistant />
-      </div>
+      <section className="py-20 px-6 text-center">
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold mb-4">Why Choose Us?</h2>
+      <p className="text-gray-600 text-lg">
+      Real-World Learning
+      We focus on practical, hands-on experience so you can build real projects and feel job-ready.
+      </p>
+    </div>
+    <div className="flex justify-center mt-8">
+    <Image src="https://images.unsplash.com/photo-1678690832871-8b9993c76aa8?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Why Choose Us" width={700} height={300} className="mt-8 items-center justify-center" />
+    </div>
+  </section>
     </div>
   )
 }
