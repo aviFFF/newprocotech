@@ -336,7 +336,7 @@ export default function FreeComputerCoursePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Classes will be conducted through a combination of online sessions and practical exercises. 
+                  Classes will be conducted through a combination of offline sessions and practical exercises. 
                   You'll receive access to learning materials and video tutorials.
                 </p>
               </CardContent>
