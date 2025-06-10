@@ -28,15 +28,15 @@ export default function FreeComputerCoursePage() {
             <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base">
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm">
                 <Clock className="h-5 w-5 text-blue-600" />
-                <span>1 Month Duration</span>
+                <span className="text-yellow-600">1 Month Duration</span>
               </div>
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm">
                 <Award className="h-5 w-5 text-green-600" />
-                <span>Certificate Included</span>
+                <span className="text-blue-600">Certificate Included</span>
               </div>
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm">
                 <Users className="h-5 w-5 text-purple-600" />
-                <span>Expert Instructors</span>
+                <span className="text-green-600">Expert Instructors</span>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function FreeComputerCoursePage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Duration</span>
-                    <span className="font-semibold">1 Month</span>
+                    <span className="font-semibold text-yellow-600">1 Month</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Price</span>
@@ -99,11 +99,11 @@ export default function FreeComputerCoursePage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Certificate</span>
-                    <span className="font-semibold">Included</span>
+                    <span className="font-semibold text-blue-500">Included</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Support</span>
-                    <span className="font-semibold">24/7</span>
+                    <span className="font-semibold text-red-500">24/7</span>
                   </div>
                 </div>
               </div>
