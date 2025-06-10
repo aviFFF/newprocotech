@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Clock, Award, Users, BookOpen, Computer } from "lucide-react"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Free Computer Course - 1 Month Program with Certificate | Procotech",
@@ -427,7 +428,9 @@ export default function FreeComputerCoursePage() {
             </div>
             <div className="flex items-center gap-2">
               <span>💬</span>
-              <span>Whatsapp Available</span>
+              <Link href="https://wa.me/8383811977" className="text-blue-500 hover:underline">
+               Whatsapp Now
+              </Link>
             </div>
           </div>
         </div>
