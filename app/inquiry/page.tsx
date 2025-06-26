@@ -124,7 +124,7 @@ export default function InquiryPage() {
               name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subject</FormLabel>
+                  <FormLabel>Mobile Number</FormLabel>
                   <FormControl>
                     <Input placeholder="Inquiry About" {...field} />
                   </FormControl>
