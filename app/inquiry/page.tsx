@@ -126,7 +126,7 @@ export default function InquiryPage() {
                 <FormItem>
                   <FormLabel>Mobile Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Inquiry About" {...field} />
+                    <Input placeholder="Mobile Number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
