@@ -368,8 +368,7 @@ export default async function Home() {
       </p>
     </div>
     <div className="flex justify-center mt-8">
-    <Image src="https://images.unsplash.com/photo-1678690832871-8b9993c76aa8?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Why Choose Us" width={700} height={300} className="mt-8 items-center justify-center" />
-    </div>
+<iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid0ojrV2Jpi66s41KiCrEHSfYiXvf5yaREvLzMSMDJEabKB9N2AKfcWhTv1pXobSZmpl%26id%3D61577623627471&show_text=true&width=500" width="500" height="674" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>    </div>
   </section>
     </div>
   )
